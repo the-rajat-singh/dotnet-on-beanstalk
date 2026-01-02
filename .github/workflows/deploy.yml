@@ -2,53 +2,47 @@ name: Deploy .NET Feedback App to Elastic Beanstalk
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout source code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2️⃣ Setup .NET SDK
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
+      # 3️⃣ Restore dependencies
       - name: Restore dependencies
         run: dotnet restore FeedbackApp/FeedbackApp.csproj
 
+      # 4️⃣ Build application
       - name: Build application
-        run: dotnet build FeedbackApp/FeedbackApp.csproj --configuration Release --no-restore
+        run: dotnet build FeedbackApp/FeedbackApp.csproj -c Release --no-restore
 
+      # 5️⃣ Publish SELF-CONTAINED app (CRITICAL FIX)
       - name: Publish application
-        run: dotnet publish FeedbackApp/FeedbackApp.csproj \
-          -c Release \
-          -r linux-x64 \
-          --self-contained true \
-          -p:PublishSingleFile=false \
-          -o publish
+        run: |
+          dotnet publish FeedbackApp/FeedbackApp.csproj \
+            -c Release \
+            -r linux-x64 \
+            --self-contained true \
+            -o publish
 
-      - name: Add Procfile to publish
+      # 6️⃣ Add Procfile INSIDE publish directory
+      - name: Add Procfile
         run: |
           echo "web: ./FeedbackApp" > publish/Procfile
 
-
-      - name: Create deployment artifact
+      # 7️⃣ Zip deployment artifact
+      - name: Create deployment package
         run: |
-          cd publish
-          zip -r app.zip .
-
-      - name: Deploy to Elastic Beanstalk
-        uses: einaregilsson/beanstalk-deploy@v21
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: feedback-app
-          environment_name: feedback-env
-          region: ap-south-1
-          version_label: ${{ github.sha }}-${{ github.run_number }}
-          deployment_package: publish/app.zip
 
