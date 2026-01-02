@@ -24,7 +24,17 @@ jobs:
         run: dotnet build FeedbackApp/FeedbackApp.csproj --configuration Release --no-restore
 
       - name: Publish application
-        run: dotnet publish FeedbackApp/FeedbackApp.csproj -c Release -o publish
+        run: dotnet publish FeedbackApp/FeedbackApp.csproj \
+          -c Release \
+          -r linux-x64 \
+          --self-contained true \
+          -p:PublishSingleFile=false \
+          -o publish
+
+      - name: Add Procfile to publish
+        run: |
+          echo "web: ./FeedbackApp" > publish/Procfile
+
 
       - name: Create deployment artifact
         run: |
