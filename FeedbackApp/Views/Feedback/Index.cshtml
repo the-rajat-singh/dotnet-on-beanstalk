@@ -1,0 +1,13 @@
+@model List<FeedbackApp.Models.Feedback>
+
+<h2>Feedback List</h2>
+
+<ul>
+@foreach (var f in Model)
+{
+    <li><b>@f.Name</b> (@f.Email): @f.Message</li>
+}
+</ul>
+
+<a href="/Feedback/Create">Add New Feedback</a>
+
