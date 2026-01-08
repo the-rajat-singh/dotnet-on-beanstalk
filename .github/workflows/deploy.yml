@@ -47,6 +47,6 @@ jobs:
           application_name: feedback-app
           environment_name: feedback-env
           region: ap-south-1
-          version_label: ${{ github.sha }}-${{ github.run_number }}
+          version_label: ${{ github.sha }}-${{ github.run_number }}1
           deployment_package: app.zip
 
